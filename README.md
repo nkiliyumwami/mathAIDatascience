@@ -1,44 +1,49 @@
-# Maths & Stats Behind Data Science and AI
+# AI Primer: The Must-Know Mathematics & Statistics Behind AI
 
-A React + Vite + Tailwind single-page study app based on `REFERENCE_APP.jsx`, preserving the math-heavy course modules, formulas, Bayes calculator, Python labs, quiz, notes, and progress tracking.
+A polished React + TypeScript + Tailwind learning app for complete beginners. The course teaches probability, descriptive statistics, and matrices through interactive simulations, editable datasets, matrix exercises, refugee-resettlement-inspired fictional scenarios, and a 30+ exercise practice system.
 
-## Setup
+## Stack
+
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui-style local component system
+- Recharts
+- Framer Motion
+- Lucide icons
+
+## Local setup
 
 ```bash
 npm install
 ```
 
-## Local development
+## Development
 
-Standard Vite dev server:
+Run locally:
 
 ```bash
 npm run dev
 ```
 
-For GitHub Codespaces or any remote environment:
+Run in GitHub Codespaces or another remote container:
 
 ```bash
 npm run dev -- --host 0.0.0.0
 ```
 
-## Codespaces note
+## Codespaces runtime note
 
-This project expects a modern Node runtime. If Codespaces starts Vite with an older Node version, you may see an error like:
+This project needs a modern Node runtime. If you see:
 
 ```bash
 TypeError: crypto.getRandomValues is not a function
 ```
 
-Check your Node version first:
+switch to Node 22 first:
 
 ```bash
 node -v
-```
-
-If it is older than Node 20, switch to a newer version before running the app:
-
-```bash
 nvm install 22
 nvm use 22
 npm install
@@ -51,22 +56,26 @@ npm run dev -- --host 0.0.0.0
 npm run build
 ```
 
-The build output is written to `dist/`.
+The production build outputs to `dist/`.
 
 ## Cloudflare Pages
 
 Use these settings:
 
+- Framework preset: `Vite`
 - Build command: `npm run build`
 - Output directory: `dist`
-- Framework preset: `Vite`
 
-## Features
+## What the app includes
 
-- Math-heavy course modules with story, idea, example, Python lab, checks, and mini-projects
-- Bayes Rule calculator with correct posterior probability calculation
-- LocalStorage-backed progress tracking
-- LocalStorage-backed notes
-- Revealable final quiz answers
-- Polished study schedule layout
-- Responsive React + Tailwind UI
+- Welcome onboarding with learner-profile selection
+- Foundations Before the Math
+- Probability module with simulator, scenario explorer, sorting exercises, and guided checks
+- Descriptive Statistics module with editable datasets, live calculations, outlier toggle, and charts
+- Matrices module with row/column highlighting, conversion demos, and matrix builder
+- Applied AI Connections section
+- Refugee-resettlement-focused fictional use cases
+- Practice Zone with 30+ exercises total across the app
+- Q&A / misconceptions accordion
+- Next Steps roadmap
+- Progress tracking and learner notebook saved in localStorage
