@@ -1,41 +1,49 @@
-# Applied AI and Data Science Prep
+# Maths & Stats Behind Data Science and AI
 
-A beginner-friendly React + Vite + Tailwind single-page app for learners preparing for an Applied AI and Data Science program.
+A React + Vite + Tailwind single-page study app based on `REFERENCE_APP.jsx`, preserving the math-heavy course modules, formulas, Bayes calculator, Python labs, quiz, notes, and progress tracking.
 
-## Local setup
+## Setup
 
 ```bash
 npm install
+```
+
+## Local development
+
+Standard Vite dev server:
+
+```bash
 npm run dev
 ```
 
-The Vite dev server will print a local URL, typically `http://localhost:5173`.
+For GitHub Codespaces or any remote environment:
+
+```bash
+npm run dev -- --host 0.0.0.0
+```
 
 ## Production build
 
 ```bash
 npm run build
-npm run preview
 ```
 
-The production output is generated in `dist/`.
+The build output is written to `dist/`.
 
 ## Cloudflare Pages
 
-Use these settings when creating the project in Cloudflare Pages:
+Use these settings:
 
-- Framework preset: `Vite`
 - Build command: `npm run build`
-- Build output directory: `dist`
-- Node.js version: `22` or current LTS-compatible version
+- Output directory: `dist`
+- Framework preset: `Vite`
 
-## Stack
+## Features
 
-- React
-- Vite
-- Tailwind CSS
-- Local storage for progress and notes persistence
-
-## Notes
-
-`COURSE_SOURCE.md` in this repository currently duplicates `AGENTS.md`, so the course structure in the app was authored from the project brief for a beginner Applied AI and Data Science preparation path.
+- Math-heavy course modules with story, idea, example, Python lab, checks, and mini-projects
+- Bayes Rule calculator with correct posterior probability calculation
+- LocalStorage-backed progress tracking
+- LocalStorage-backed notes
+- Revealable final quiz answers
+- Polished study schedule layout
+- Responsive React + Tailwind UI

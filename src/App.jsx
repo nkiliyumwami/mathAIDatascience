@@ -1,118 +1,98 @@
 import { useMemo, useState } from 'react'
-import { courseModules, finalQuiz, schedulePlan } from './data/courseContent'
+import modules from './data/modules'
+import finalQuiz from './data/finalQuiz'
+import schedule from './data/schedule'
 import { useLocalStorage } from './hooks/useLocalStorage'
+import { ProgressRing } from './components/ProgressRing'
 import { Sidebar } from './components/Sidebar'
-import { HeroSection } from './components/HeroSection'
-import { ProgressPanel } from './components/ProgressPanel'
-import { ModuleSection } from './components/ModuleSection'
+import { ModuleViewer } from './components/ModuleViewer'
 import { BayesCalculator } from './components/BayesCalculator'
 import { StudySchedule } from './components/StudySchedule'
 import { FinalQuiz } from './components/FinalQuiz'
-import { NotesPanel } from './components/NotesPanel'
 
-const defaultProgress = courseModules.reduce((accumulator, module) => {
+const defaultProgress = modules.reduce((accumulator, module) => {
   accumulator[module.id] = false
   return accumulator
 }, {})
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('overview')
-  const [completedModules, setCompletedModules] = useLocalStorage(
-    'ai-prep-progress',
-    defaultProgress,
+  const [activeModule, setActiveModule] = useState(0)
+  const [completed, setCompleted] = useLocalStorage('math-ai-course-completed', defaultProgress)
+  const [notes, setNotes] = useLocalStorage('math-ai-course-notes', '')
+
+  const completedCount = useMemo(
+    () => Object.values(completed).filter(Boolean).length,
+    [completed],
   )
-  const [notes, setNotes] = useLocalStorage('ai-prep-notes', '')
+  const progress = Math.round((completedCount / modules.length) * 100)
+  const module = modules[activeModule]
 
-  const completedCount = Object.values(completedModules).filter(Boolean).length
-  const completionRate = Math.round((completedCount / courseModules.length) * 100)
-
-  const activeModule = useMemo(
-    () => courseModules.find((module) => module.id === activeSection),
-    [activeSection],
-  )
-
-  const toggleModuleComplete = (moduleId) => {
-    setCompletedModules((current) => ({
-      ...current,
-      [moduleId]: !current[moduleId],
+  const toggleCompleted = (id) => {
+    setCompleted((previous) => ({
+      ...previous,
+      [id]: !previous[id],
     }))
   }
 
   return (
-    <div className="min-h-screen text-ink">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-4 md:px-6 lg:flex-row lg:px-8">
-        <Sidebar
-          activeSection={activeSection}
-          completionRate={completionRate}
-          completedModules={completedModules}
-          moduleCount={courseModules.length}
-          onSelect={setActiveSection}
-          modules={courseModules}
-        />
-
-        <main className="flex-1 space-y-6 pb-10">
-          <HeroSection
-            completedCount={completedCount}
-            moduleCount={courseModules.length}
-            onJumpToModules={() => setActiveSection(courseModules[0].id)}
-          />
-
-          <ProgressPanel
-            completionRate={completionRate}
-            completedCount={completedCount}
-            moduleCount={courseModules.length}
-            nextModule={courseModules.find((module) => !completedModules[module.id])}
-          />
-
-          <section id="overview" className="surface overflow-hidden p-6 md:p-8">
-            <div className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
-              <div className="space-y-4">
-                <p className="eyebrow">Course Map</p>
-                <h2 className="section-title">A practical path into AI and data science</h2>
-                <p className="max-w-3xl text-sm leading-7 text-ink/80 md:text-base">
-                  This study app is built for learners starting from scratch. You will move from
-                  math comfort and probability thinking into Python habits, machine learning
-                  intuition, and an applied capstone mindset. Each module tells a story, explains
-                  the idea, shows a concrete example, gives you a Python lab, and ends with a
-                  mini-project so the material feels usable rather than abstract.
-                </p>
-                <div className="grid gap-4 md:grid-cols-3">
-                  {[
-                    ['6 modules', 'Sequenced from foundations to model thinking'],
-                    ['Bayes lab', 'Change prevalence, sensitivity, and specificity live'],
-                    ['Saved notes', 'Keep reflections and reminders in your browser'],
-                  ].map(([title, description]) => (
-                    <div key={title} className="rounded-2xl bg-mist p-4">
-                      <h3 className="font-display text-lg font-semibold">{title}</h3>
-                      <p className="mt-2 text-sm leading-6 text-ink/75">{description}</p>
-                    </div>
-                  ))}
-                </div>
+    <main className="min-h-screen px-4 py-4 text-slate-900 md:px-6 md:py-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <header className="hero-shell overflow-hidden rounded-[2rem] text-white shadow-2xl">
+          <div className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:p-8">
+            <div>
+              <p className="mb-3 inline-flex rounded-full bg-white/10 px-3 py-1 text-sm font-medium ring-1 ring-white/20">
+                Beginner-friendly Applied AI prep
+              </p>
+              <h1 className="max-w-4xl text-3xl font-black tracking-tight md:text-5xl">
+                Maths &amp; Stats Behind Data Science and AI
+              </h1>
+              <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
+                A guided, interactive course with plain-English explanations, formulas, Python
+                labs, check-yourself questions, and a focused study schedule.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2 text-sm text-slate-200">
+                <span className="rounded-full bg-white/10 px-3 py-1">Probability</span>
+                <span className="rounded-full bg-white/10 px-3 py-1">Bayes&apos; Rule</span>
+                <span className="rounded-full bg-white/10 px-3 py-1">Matrices</span>
+                <span className="rounded-full bg-white/10 px-3 py-1">Image arrays</span>
+                <span className="rounded-full bg-white/10 px-3 py-1">PCA</span>
               </div>
-
-              <NotesPanel notes={notes} setNotes={setNotes} activeModule={activeModule} />
             </div>
-          </section>
 
-          <section className="space-y-6">
-            {courseModules.map((module, index) => (
-              <ModuleSection
-                key={module.id}
-                index={index}
-                isActive={activeSection === module.id}
-                isComplete={completedModules[module.id]}
-                module={module}
-                onActivate={() => setActiveSection(module.id)}
-                onToggleComplete={() => toggleModuleComplete(module.id)}
-              />
-            ))}
-          </section>
+            <div className="flex items-center justify-center rounded-3xl bg-white p-5 text-slate-950">
+              <div className="text-center">
+                <ProgressRing value={progress} />
+                <p className="mt-2 text-sm font-medium text-slate-600">
+                  {completedCount} of {modules.length} modules complete
+                </p>
+              </div>
+            </div>
+          </div>
+        </header>
 
-          <BayesCalculator onActivate={() => setActiveSection('bayes')} />
-          <StudySchedule items={schedulePlan} />
-          <FinalQuiz quizItems={finalQuiz} />
-        </main>
+        <section className="grid gap-6 lg:grid-cols-[320px_1fr]">
+          <Sidebar
+            activeModule={activeModule}
+            completed={completed}
+            modules={modules}
+            notes={notes}
+            onNotesChange={setNotes}
+            onSelectModule={setActiveModule}
+          />
+
+          <div className="space-y-6">
+            <ModuleViewer
+              module={module}
+              isCompleted={Boolean(completed[module.id])}
+              onToggleComplete={() => toggleCompleted(module.id)}
+            />
+            <BayesCalculator />
+          </div>
+        </section>
+
+        <StudySchedule schedule={schedule} />
+        <FinalQuiz quizItems={finalQuiz} />
       </div>
-    </div>
+    </main>
   )
 }

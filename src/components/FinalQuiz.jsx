@@ -1,41 +1,39 @@
 import { useState } from 'react'
 
 export function FinalQuiz({ quizItems }) {
-  const [revealed, setRevealed] = useState({})
+  const [revealedQuiz, setRevealedQuiz] = useState({})
 
-  const toggleAnswer = (index) => {
-    setRevealed((current) => ({
-      ...current,
-      [index]: !current[index],
+  const toggleQuiz = (index) => {
+    setRevealedQuiz((previous) => ({
+      ...previous,
+      [index]: !previous[index],
     }))
   }
 
   return (
-    <section id="quiz" className="surface scroll-mt-6 p-6 md:p-8">
-      <p className="eyebrow">Final Practice Quiz</p>
-      <h2 className="section-title mt-2">Check whether the core ideas now feel connected</h2>
-      <div className="mt-6 space-y-4">
+    <section className="card p-5 md:p-6">
+      <div className="mb-5">
+        <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Final practice
+        </p>
+        <h2 className="text-2xl font-black text-slate-950">7-question quiz</h2>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
         {quizItems.map((item, index) => (
-          <div key={item.question} className="rounded-3xl bg-mist p-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-slateblue/75">
-                  Question {index + 1}
-                </p>
-                <p className="mt-2 text-base font-semibold text-ink">{item.question}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => toggleAnswer(index)}
-                className="rounded-full border border-slateblue/20 bg-white px-4 py-2 text-sm font-semibold text-slateblue"
-              >
-                {revealed[index] ? 'Hide answer' : 'Reveal answer'}
-              </button>
-            </div>
-            {revealed[index] && (
-              <p className="mt-4 rounded-2xl bg-white p-4 text-sm leading-7 text-ink/80">
-                {item.answer}
-              </p>
+          <div key={`${index}-${item.q}`} className="rounded-2xl bg-slate-50 p-4">
+            <p className="font-semibold text-slate-800">
+              {index + 1}. {item.q}
+            </p>
+            <button
+              type="button"
+              onClick={() => toggleQuiz(index)}
+              className="mt-3 rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white"
+            >
+              {revealedQuiz[index] ? 'Hide answer' : 'Show answer'}
+            </button>
+            {revealedQuiz[index] && (
+              <p className="mt-2 text-sm leading-6 text-slate-700">{item.a}</p>
             )}
           </div>
         ))}

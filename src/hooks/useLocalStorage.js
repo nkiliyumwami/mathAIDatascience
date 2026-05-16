@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 export function useLocalStorage(key, initialValue) {
-  const [storedValue, setStoredValue] = useState(() => {
+  const [value, setValue] = useState(() => {
     if (typeof window === 'undefined') {
       return initialValue
     }
@@ -15,8 +15,16 @@ export function useLocalStorage(key, initialValue) {
   })
 
   useEffect(() => {
-    window.localStorage.setItem(key, JSON.stringify(storedValue))
-  }, [key, storedValue])
+    if (typeof window === 'undefined') {
+      return
+    }
 
-  return [storedValue, setStoredValue]
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value))
+    } catch {
+      // Ignore storage failures in restricted environments.
+    }
+  }, [key, value])
+
+  return [value, setValue]
 }

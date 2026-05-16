@@ -1,25 +1,38 @@
-export function StudySchedule({ items }) {
+export function StudySchedule({ schedule }) {
   return (
-    <section id="schedule" className="surface scroll-mt-6 p-6 md:p-8">
-      <p className="eyebrow">Study Schedule</p>
-      <h2 className="section-title mt-2">A six-week rhythm you can actually sustain</h2>
-      <p className="mt-3 max-w-3xl text-sm leading-7 text-ink/80 md:text-base">
-        The goal is steady momentum, not marathon sessions. Each week has one focus area and one
-        checkpoint so you know what “good progress” looks like.
-      </p>
+    <section className="card p-5 md:p-6">
+      <div className="mb-5">
+        <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Study schedule
+        </p>
+        <h2 className="text-2xl font-black text-slate-950">Focused plan through May 16</h2>
+        <p className="mt-1 text-slate-600">
+          The main learning load is May 14–15. May 16 is intentionally light review.
+        </p>
+      </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        {items.map((item) => (
-          <article key={item.week} className="rounded-3xl bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="font-display text-xl font-semibold">{item.week}</h3>
-              <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slateblue">
-                Focus
-              </span>
+      <div className="grid gap-4 md:grid-cols-3">
+        {schedule.map((day) => (
+          <div
+            key={day.day}
+            className="rounded-3xl bg-gradient-to-b from-slate-50 to-white p-4 ring-1 ring-slate-200"
+          >
+            <h3 className="text-lg font-black">{day.day}</h3>
+            <p className="mt-1 text-sm font-medium text-slate-500">{day.focus}</p>
+            <div className="mt-4 space-y-3">
+              {day.blocks.map((block) => (
+                <div
+                  key={`${day.day}-${block.time}-${block.task}`}
+                  className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100"
+                >
+                  <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600">
+                    {block.time}
+                  </span>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">{block.task}</p>
+                </div>
+              ))}
             </div>
-            <p className="mt-3 text-sm font-semibold text-ink">{item.focus}</p>
-            <p className="mt-3 text-sm leading-6 text-ink/75">{item.checkpoint}</p>
-          </article>
+          </div>
         ))}
       </div>
     </section>

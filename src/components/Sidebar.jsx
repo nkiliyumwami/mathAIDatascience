@@ -1,93 +1,65 @@
-const staticLinks = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'bayes', label: 'Bayes Lab' },
-  { id: 'schedule', label: 'Study Schedule' },
-  { id: 'quiz', label: 'Final Quiz' },
-]
+function itemClassName(isActive) {
+  return [
+    'w-full rounded-2xl p-3 text-left transition hover:bg-slate-100',
+    isActive ? 'bg-slate-950 text-white hover:bg-slate-900' : 'bg-slate-50 text-slate-800',
+  ].join(' ')
+}
 
 export function Sidebar({
-  activeSection,
-  completionRate,
-  completedModules,
-  moduleCount,
+  activeModule,
+  completed,
   modules,
-  onSelect,
+  notes,
+  onNotesChange,
+  onSelectModule,
 }) {
   return (
-    <aside className="surface top-4 h-fit p-4 lg:sticky lg:w-80">
-      <div className="rounded-3xl bg-ink p-5 text-white">
-        <p className="eyebrow text-white/70">Navigator</p>
-        <h1 className="mt-2 font-display text-2xl font-semibold">AI & Data Science Prep</h1>
-        <p className="mt-3 text-sm leading-6 text-white/75">
-          Follow the sequence, track your progress, and keep everything in one study space.
-        </p>
-        <div className="mt-5">
-          <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-white/70">
-            <span>Progress</span>
-            <span>{completionRate}%</span>
-          </div>
-          <div className="mt-2 h-2 rounded-full bg-white/15">
-            <div
-              className="h-2 rounded-full bg-ember transition-all"
-              style={{ width: `${completionRate}%` }}
-            />
-          </div>
-          <p className="mt-2 text-sm text-white/75">
-            {Object.values(completedModules).filter(Boolean).length} of {moduleCount} modules
-            complete
-          </p>
+    <aside className="space-y-4">
+      <div className="card p-4">
+        <h2 className="mb-3 text-lg font-bold">Course modules</h2>
+        <div className="space-y-2">
+          {modules.map((module) => (
+            <button
+              key={module.id}
+              type="button"
+              onClick={() => onSelectModule(module.id)}
+              className={itemClassName(activeModule === module.id)}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-semibold">Module {module.id}</span>
+                <span
+                  className={`text-xs ${
+                    activeModule === module.id ? 'text-slate-300' : 'text-slate-500'
+                  }`}
+                >
+                  {module.time}
+                </span>
+              </div>
+              <div className="mt-1 text-sm opacity-90">{module.title}</div>
+              <div className="mt-2 flex items-center gap-2 text-xs">
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    completed[module.id] ? 'bg-emerald-400' : 'bg-slate-300'
+                  }`}
+                />
+                {completed[module.id] ? 'Completed' : module.theme}
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 
-      <nav className="mt-5 space-y-2">
-        {modules.map((module) => (
-          <button
-            key={module.id}
-            type="button"
-            onClick={() => onSelect(module.id)}
-            className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition ${
-              activeSection === module.id
-                ? 'bg-slateblue text-white shadow-lg'
-                : 'bg-mist text-ink hover:bg-sand'
-            }`}
-          >
-            <span>
-              <span className="block font-semibold">{module.shortLabel}</span>
-              <span className="block text-xs opacity-75">{module.duration}</span>
-            </span>
-            <span
-              className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                completedModules[module.id]
-                  ? 'bg-pine/20 text-pine'
-                  : activeSection === module.id
-                    ? 'bg-white/15 text-white'
-                    : 'bg-white text-slateblue'
-              }`}
-            >
-              {completedModules[module.id] ? 'Done' : 'Open'}
-            </span>
-          </button>
-        ))}
-      </nav>
-
-      <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-        {staticLinks.map((link) => (
-          <button
-            key={link.id}
-            type="button"
-            onClick={() => {
-              onSelect(link.id)
-              document.getElementById(link.id)?.scrollIntoView({ behavior: 'smooth' })
-            }}
-            className={`rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${
-              activeSection === link.id
-                ? 'border-slateblue bg-slateblue text-white'
-                : 'border-slateblue/10 bg-white hover:border-slateblue/30 hover:bg-mist'
-            }`}
-          >
-            {link.label}
-          </button>
-        ))}
+      <div className="card p-4">
+        <h2 className="text-lg font-bold">My study notes</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Use this space for formulas, confusing ideas, and examples from work.
+        </p>
+        <textarea
+          value={notes}
+          onChange={(event) => onNotesChange(event.target.value)}
+          placeholder="Example: Prevalence means how common something is before the test..."
+          className="mt-3 min-h-40 w-full rounded-2xl border border-slate-200 p-3 text-sm outline-none focus:ring-2 focus:ring-slate-900"
+        />
       </div>
     </aside>
   )
