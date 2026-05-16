@@ -1,56 +1,101 @@
 # Project Instructions for Codex
 
-Build this as a production-ready React + Vite single-page web app.
+This project is an interactive React + Vite + Tailwind course app.
 
-## Goal
+The file `REFERENCE_APP.jsx` is the preferred reference implementation. Do not replace it with a lighter, generic course app.
 
-Create an interactive beginner-friendly web app based on COURSE_SOURCE.md.
+## Primary Goal
 
-The app should help a learner prepare for an Applied AI & Data Science program. The learner is new to math, probability, Python, and machine learning.
+Rebuild the app so the final project closely follows `REFERENCE_APP.jsx`.
 
-## Requirements
+The user prefers this version because it is more math-heavy, practical, and structured around the actual learning modules.
+
+## Must Preserve
+
+Preserve the following from `REFERENCE_APP.jsx`:
+
+- The course title: "Maths & Stats Behind Data Science and AI"
+- The module-based structure
+- The `modules` array content
+- The math concepts:
+  - Probability fundamentals
+  - Conditional probability
+  - Bayes’ Rule
+  - Vectors and matrices
+  - Recommendation systems
+  - Images as numerical arrays
+  - PCA and dimension reduction
+- Python Lab sections
+- Check Yourself questions with show/hide answers
+- Mini-projects
+- Final 7-question quiz
+- Bayes Rule calculator with sliders
+- Progress tracking
+- localStorage persistence
+- Notes box
+- Study schedule
+- Clean responsive layout
+
+## Allowed Improvements
+
+You may improve:
+
+- File organization
+- Component structure
+- Styling polish
+- Mobile responsiveness
+- Accessibility
+- README instructions
+- Cloudflare deployment readiness
+- Minor wording clarity
+
+## Do Not Do
+
+- Do not make the app less mathematical.
+- Do not replace the course with generic AI summaries.
+- Do not remove Python code labs.
+- Do not remove Bayes’ Rule calculations.
+- Do not remove module navigation.
+- Do not remove the study schedule.
+- Do not turn this into a plain static document.
+- Do not add a backend, database, paid API, authentication, or server requirement.
+
+## Technical Requirements
 
 Use:
+
 - React
 - Vite
 - Tailwind CSS
-- Clean component structure
+- localStorage for progress and notes
 - No backend
-- No paid APIs
-- No external database
 
-The app must include:
-- Home/overview section
-- Module navigation
-- Interactive progress tracking using localStorage
-- Each module should include:
-  - The Story
-  - The Idea
-  - Concrete Example
-  - Python Lab
-  - Check Yourself questions with show/hide answers
-  - Mini-Project
-- Interactive Bayes Rule calculator
-- Study schedule section
-- Final practice quiz
-- Responsive design for desktop and mobile
-- Cloudflare Pages compatibility
+The app must build successfully with:
 
-## Cloudflare Pages build requirements
-
-The final project must support:
-
-Build command:
 npm run build
 
-Output directory:
-dist
+Cloudflare Pages settings must be:
 
-## Quality expectations
+Build command: npm run build
+Build output directory: dist
 
-- Do not create a plain static text page.
-- Make the app visually polished.
-- Use beginner-friendly language.
-- Preserve the educational sequence from COURSE_SOURCE.md.
-- Keep the course practical and connected to real-world program/data examples where appropriate.
-- Add a README with setup, local preview, and Cloudflare deployment instructions.
+## Deliverables
+
+Create or update:
+
+- package.json
+- index.html
+- src/main.jsx
+- src/App.jsx
+- src/index.css
+- README.md
+
+The README must include:
+
+- how to run in Codespaces
+- npm install
+- npm run dev -- --host 0.0.0.0
+- npm run build
+- Cloudflare Pages deployment settings
+
+Open a pull request instead of pushing directly to main.
