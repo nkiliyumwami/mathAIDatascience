@@ -1,81 +1,73 @@
-# AI Primer: The Must-Know Mathematics & Statistics Behind AI
+# Applied AI Prep Study App
 
-A polished React + TypeScript + Tailwind learning app for complete beginners. The course teaches probability, descriptive statistics, and matrices through interactive simulations, editable datasets, matrix exercises, refugee-resettlement-inspired fictional scenarios, and a 30+ exercise practice system.
+A production-ready React + Vite + Tailwind single-page app for beginners preparing for an Applied AI & Data Science program.
 
-## Stack
+The app focuses on the practical bridge between math, probability, descriptive statistics, Python, and machine learning. It is built for learners who are new to the subject and need a guided sequence instead of a static notes page.
+
+## Features
+
+- Home and overview section
+- Module navigation with five structured learning modules
+- Per-module learning flow:
+  - The Story
+  - The Idea
+  - Concrete Example
+  - Python Lab
+  - Check Yourself prompts with show/hide answers
+  - Mini-Project
+- Interactive progress tracking with `localStorage`
+- Interactive Bayes Rule calculator
+- Study schedule with trackable weekly tasks
+- Final practice quiz
+- Responsive layout for desktop and mobile
+- Cloudflare Pages compatible build output
+
+## Tech stack
 
 - React
+- Vite
 - TypeScript
 - Tailwind CSS
-- shadcn/ui-style local component system
-- Recharts
-- Framer Motion
-- Lucide icons
 
 ## Local setup
+
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-## Development
-
-Run locally:
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-Run in GitHub Codespaces or another remote container:
+## Local preview of production build
 
-```bash
-npm run dev -- --host 0.0.0.0
-```
-
-## Codespaces runtime note
-
-This project needs a modern Node runtime. If you see:
-
-```bash
-TypeError: crypto.getRandomValues is not a function
-```
-
-switch to Node 22 first:
-
-```bash
-node -v
-nvm install 22
-nvm use 22
-npm install
-npm run dev -- --host 0.0.0.0
-```
-
-## Production build
+Build the app:
 
 ```bash
 npm run build
 ```
 
-The production build outputs to `dist/`.
+Preview the built app locally:
 
-## Cloudflare Pages
+```bash
+npm run preview
+```
 
-Use these settings:
+The production files are generated in `dist/`.
+
+## Cloudflare Pages deployment
+
+Use these settings in Cloudflare Pages:
 
 - Framework preset: `Vite`
 - Build command: `npm run build`
-- Output directory: `dist`
+- Build output directory: `dist`
 
-## What the app includes
+## Notes
 
-- Welcome onboarding with learner-profile selection
-- Foundations Before the Math
-- Probability module with simulator, scenario explorer, sorting exercises, and guided checks
-- Descriptive Statistics module with editable datasets, live calculations, outlier toggle, and charts
-- Matrices module with row/column highlighting, conversion demos, and matrix builder
-- Applied AI Connections section
-- Refugee-resettlement-focused fictional use cases
-- Practice Zone with 30+ exercises total across the app
-- Q&A / misconceptions accordion
-- Next Steps roadmap
-- Progress tracking and learner notebook saved in localStorage
+- Progress and study checklist state are stored in the browser with `localStorage`.
+- The project uses no backend, no paid APIs, and no external database.

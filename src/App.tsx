@@ -1,279 +1,394 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
-import { BookOpenCheck, BrainCircuit, UsersRound } from 'lucide-react'
-import { CourseSidebar } from '@/components/CourseSidebar'
-import { FoundationsModule } from '@/components/FoundationsModule'
-import { ProbabilityModule } from '@/components/ProbabilityModule'
-import { StatisticsModule } from '@/components/StatisticsModule'
-import { MatricesModule } from '@/components/MatricesModule'
-import { AppliedConnections } from '@/components/AppliedConnections'
-import { UseCasesSection } from '@/components/UseCasesSection'
-import { PracticeZone } from '@/components/PracticeZone'
-import { QASection } from '@/components/QASection'
-import { NextStepsSection } from '@/components/NextStepsSection'
-import { WelcomeSection } from '@/components/WelcomeSection'
-import { Progress } from '@/components/ui/progress'
-import { Card, CardContent } from '@/components/ui/card'
-import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useMemo, useState } from 'react'
 import {
-  chartData,
-  countyDemandData,
-  exercises,
-  faqs,
-  foundationCards,
-  glossary,
-  learnerProfiles,
-  matrixRecords,
-  misconceptionCallouts,
-  roadmap,
-  sectionOrder,
-  sectionTitles,
-  serviceDatasets,
-  useCases,
-} from '@/data/courseData'
+  Binary,
+  BookOpenCheck,
+  BrainCircuit,
+  CalendarClock,
+  ChevronRight,
+  GraduationCap,
+  LayoutGrid,
+  Percent,
+  Sigma,
+  Target,
+} from 'lucide-react'
+import { BayesCalculator } from '@/components/BayesCalculator'
+import { CapstoneProject } from '@/components/CapstoneProject'
+import { FinalPracticeQuiz } from '@/components/FinalPracticeQuiz'
+import { ModuleViewer } from '@/components/ModuleViewer'
+import { StudyNotesPanel } from '@/components/StudyNotesPanel'
+import { StudySchedule } from '@/components/StudySchedule'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { capstoneProject, courseModules, finalQuiz, studySchedule } from '@/data/courseModules'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 
-const exerciseIdsBySection = exercises.reduce<Record<string, string[]>>((accumulator, exercise) => {
-  accumulator[exercise.moduleId] = [...(accumulator[exercise.moduleId] ?? []), exercise.id]
-  return accumulator
-}, {})
+const overviewPoints = [
+  'Start with intuition before formulas.',
+  'Learn probability, statistics, Python, and ML in one connected path.',
+  'Track progress locally so you can study in small sessions.',
+]
+
+const quickWins = [
+  {
+    title: 'Beginner-friendly sequence',
+    body: 'The modules move from foundations to probability, statistics, Python, and machine learning.',
+    icon: BookOpenCheck,
+  },
+  {
+    title: 'Practical examples',
+    body: 'Each lesson uses realistic program and community-service scenarios instead of abstract textbook-only language.',
+    icon: Target,
+  },
+  {
+    title: 'Interactive revision',
+    body: 'You can mark modules done, use a Bayes calculator, work a study plan, and test yourself with a final quiz.',
+    icon: BrainCircuit,
+  },
+]
+
+const moduleIconMap = {
+  foundations: LayoutGrid,
+  probability: Percent,
+  statistics: Sigma,
+  matrices: Target,
+  'python-ml': Binary,
+} as const
 
 export default function App() {
-  const [selectedProfile, setSelectedProfile] = useLocalStorage('ai-primer-profile', learnerProfiles[0].id)
-  const [completedExerciseIds, setCompletedExerciseIds] = useLocalStorage<string[]>(
-    'ai-primer-completed-exercises',
+  const [activeModuleId, setActiveModuleId] = useState(courseModules[0].id)
+  const [completedModuleIds, setCompletedModuleIds] = useLocalStorage<string[]>('ai-prep-completed-modules', [])
+  const [completedScheduleTaskIds, setCompletedScheduleTaskIds] = useLocalStorage<string[]>(
+    'ai-prep-completed-schedule-tasks',
     [],
   )
-  const [visitedSections, setVisitedSections] = useLocalStorage<string[]>('ai-primer-visited-sections', [
-    'welcome',
-  ])
-  const [notes, setNotes] = useLocalStorage('ai-primer-notes', '')
-  const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('ai-primer-theme', 'dark')
-  const [activeSection, setActiveSection] = useState<string>('welcome')
-  const observerRef = useRef<IntersectionObserver | null>(null)
+  const [selectedLessonAnswers] = useLocalStorage<Record<string, string>>('ai-prep-sublesson-answers', {})
+  const [selectedModuleExerciseAnswers] = useLocalStorage<Record<string, string>>(
+    'ai-prep-module-exercise-answers',
+    {},
+  )
+  const [finalQuizAnswers] = useLocalStorage<Record<string, string>>('ai-prep-final-quiz-answers', {})
 
-  const completeExercise = (exerciseId: string) => {
-    setCompletedExerciseIds((current) =>
-      current.includes(exerciseId) ? current : [...current, exerciseId],
+  const activeModule = courseModules.find((module) => module.id === activeModuleId) ?? courseModules[0]
+  const totalScheduleTasks = studySchedule.reduce((count, entry) => count + entry.tasks.length, 0)
+  const totalSubLessonChecks = courseModules.reduce((count, module) => count + module.subLessons.length, 0)
+  const totalModuleExercises = courseModules.reduce((count, module) => count + module.questions.length, 0)
+  const completedSubLessonChecks = courseModules.reduce((count, module) => {
+    return (
+      count +
+      module.subLessons.filter(
+        (lesson, index) =>
+          selectedLessonAnswers[`${module.id}-sublesson-${index}`] === lesson.quickCheck.correctOption,
+      ).length
+    )
+  }, 0)
+  const completedModuleExercises = courseModules.reduce((count, module) => {
+    return (
+      count +
+      module.questions.filter(
+        (question, index) =>
+          selectedModuleExerciseAnswers[`${module.id}-exercise-${index}`] === question.correctOption,
+      ).length
+    )
+  }, 0)
+  const completedFinalQuizAnswers = finalQuiz.filter(
+    (question) => finalQuizAnswers[question.id] === question.answer,
+  ).length
+  const totalTrackableItems =
+    courseModules.length + totalScheduleTasks + totalSubLessonChecks + totalModuleExercises + finalQuiz.length
+  const completedItems =
+    completedModuleIds.length +
+    completedScheduleTaskIds.length +
+    completedSubLessonChecks +
+    completedModuleExercises +
+    completedFinalQuizAnswers
+  const progressValue = Math.round((completedItems / totalTrackableItems) * 100)
+
+  const moduleProgressLabel = useMemo(
+    () => `${completedModuleIds.length}/${courseModules.length} modules complete`,
+    [completedModuleIds.length],
+  )
+  const lessonProgressLabel = `${completedSubLessonChecks}/${totalSubLessonChecks} checks correct`
+  const exerciseProgressLabel = `${completedModuleExercises}/${totalModuleExercises} exercises correct`
+  const quizProgressLabel = `${completedFinalQuizAnswers}/${finalQuiz.length} quiz correct`
+  const recommendedNextLesson = useMemo(() => {
+    for (const module of courseModules) {
+      for (const [index, lesson] of module.subLessons.entries()) {
+        if (selectedLessonAnswers[`${module.id}-sublesson-${index}`] !== lesson.quickCheck.correctOption) {
+          return {
+            moduleId: module.id,
+            title: lesson.title,
+            reason: `This is the first sub-lesson that is not yet mastered in ${module.shortLabel}. Revisiting it should improve your progress fastest.`,
+          }
+        }
+      }
+
+      for (const [index, question] of module.questions.entries()) {
+        if (selectedModuleExerciseAnswers[`${module.id}-exercise-${index}`] !== question.correctOption) {
+          return {
+            moduleId: module.id,
+            title: `${module.shortLabel}: end-of-module exercise`,
+            reason: `One of the module-end checks in ${module.shortLabel} is still incomplete or incorrect.`,
+          }
+        }
+      }
+    }
+
+    return null
+  }, [selectedLessonAnswers, selectedModuleExerciseAnswers])
+
+  const toggleModuleComplete = (moduleId: string) => {
+    setCompletedModuleIds((current) =>
+      current.includes(moduleId) ? current.filter((item) => item !== moduleId) : [...current, moduleId],
     )
   }
 
-  const progressValue = Math.round(
-    ((completedExerciseIds.length / exercises.length) * 0.75 +
-      (visitedSections.length / sectionOrder.length) * 0.25) *
-      100,
-  )
-
-  const sectionCompletion = useMemo(() => {
-    return sectionOrder.reduce<Record<string, boolean>>((accumulator, sectionId) => {
-      const sectionExercises = exerciseIdsBySection[sectionId] ?? []
-
-      if (sectionExercises.length > 0) {
-        accumulator[sectionId] = sectionExercises.every((id) => completedExerciseIds.includes(id))
-      } else {
-        accumulator[sectionId] = visitedSections.includes(sectionId)
-      }
-
-      return accumulator
-    }, {})
-  }, [completedExerciseIds, visitedSections])
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-    document.documentElement.dataset.theme = theme
-  }, [theme])
-
-  useEffect(() => {
-    observerRef.current?.disconnect()
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.find((entry) => entry.isIntersecting)
-        if (!visible) {
-          return
-        }
-
-        const sectionId = visible.target.id
-        setActiveSection(sectionId)
-        setVisitedSections((current) =>
-          current.includes(sectionId) ? current : [...current, sectionId],
-        )
-      },
-      { rootMargin: '-20% 0px -60% 0px', threshold: 0.2 },
+  const toggleScheduleTask = (taskId: string) => {
+    setCompletedScheduleTaskIds((current) =>
+      current.includes(taskId) ? current.filter((item) => item !== taskId) : [...current, taskId],
     )
+  }
 
-    sectionOrder.forEach((sectionId) => {
-      const element = document.getElementById(sectionId)
-      if (element) {
-        observerRef.current?.observe(element)
-      }
-    })
-
-    return () => observerRef.current?.disconnect()
-  }, [setVisitedSections])
-
-  const jumpToSection = (sectionId: string) => {
-    setActiveSection(sectionId)
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const resetAllProgress = () => {
+    setCompletedModuleIds([])
+    setCompletedScheduleTaskIds([])
+    localStorage.setItem('ai-prep-sublesson-answers', JSON.stringify({}))
+    localStorage.setItem('ai-prep-sublesson-completions', JSON.stringify([]))
+    localStorage.setItem('ai-prep-module-exercise-answers', JSON.stringify({}))
+    localStorage.setItem('ai-prep-module-exercise-completions', JSON.stringify([]))
+    localStorage.setItem('ai-prep-final-quiz-answers', JSON.stringify({}))
+    localStorage.setItem('ai-prep-final-quiz-submitted', JSON.stringify(false))
+    window.location.reload()
   }
 
   return (
-    <div className={theme === 'light' ? 'theme-light' : 'theme-dark'}>
-      <main className="min-h-screen px-4 py-4 md:px-6 md:py-6">
-        <div className="mx-auto max-w-[1600px] space-y-6">
-          <motion.header
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="glass-panel overflow-hidden px-6 py-6 md:px-8"
-          >
-            <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr] xl:items-center">
-              <div>
-                <div className="mb-3 inline-flex rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-sky-200">
-                  Beginner-first learning product
-                </div>
-                <h1 className="max-w-4xl text-4xl font-black tracking-tight text-white md:text-6xl">
-                  AI Primer: The Must-Know Mathematics &amp; Statistics Behind AI
-                </h1>
-                <p className="mt-4 max-w-3xl text-base leading-8 text-slate-300 md:text-lg">
-                  Learn probability, descriptive statistics, and matrices through guided simulations,
-                  data labs, matrix builders, chart reading, and fictional service scenarios inspired
-                  by refugee resettlement work in Massachusetts and across the USA.
-                </p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                  {[
-                    {
-                      icon: BrainCircuit,
-                      title: 'Intuition-first teaching',
-                      body: 'Concepts start in plain language before moving into formulas or numeric structures.',
-                    },
-                    {
-                      icon: UsersRound,
-                      title: 'Human-centered examples',
-                      body: 'The app uses humane, fictional cases around housing, schools, interpretation, and referrals.',
-                    },
-                    {
-                      icon: BookOpenCheck,
-                      title: 'Guided practice',
-                      body: `${exercises.length} graded exercises with hints, retry flows, and explanations.`,
-                    },
-                  ].map((item) => (
-                    <Card key={item.title} className="border-white/10 bg-white/5">
-                      <CardContent className="p-5">
-                        <item.icon className="h-5 w-5 text-sky-300" />
-                        <h2 className="mt-3 font-semibold text-white">{item.title}</h2>
-                        <p className="mt-2 text-sm leading-6 text-slate-300">{item.body}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+    <main className="min-h-screen bg-[linear-gradient(180deg,#f5fbff_0%,#eef7f2_40%,#fffaf1_100%)] px-4 py-5 text-slate-950 md:px-6 md:py-8">
+      <div className="mx-auto max-w-[1500px] space-y-6">
+        <section className="overflow-hidden rounded-[2rem] border border-white/70 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.22),transparent_28%),linear-gradient(135deg,#062b3d_0%,#0f172a_38%,#15384d_100%)] px-6 py-7 text-white shadow-[0_30px_90px_rgba(15,23,42,0.24)] md:px-8 md:py-9">
+          <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr] xl:items-center">
+            <div>
+              <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.3em] text-cyan-200">
+                Applied AI Prep
               </div>
-
-              <Card className="border-white/10 bg-slate-950/70">
-                <CardContent className="p-6">
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-sky-200">
-                    Learning signal
-                  </p>
-                  <p className="mt-3 text-4xl font-black text-white">{progressValue}%</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-300">
-                    Progress blends completed exercises with visited sections so learners can keep momentum even before they finish every practice item.
-                  </p>
-                  <div className="mt-6">
-                    <div className="mb-2 flex items-center justify-between text-sm text-slate-300">
-                      <span>{completedExerciseIds.length} exercises finished</span>
-                      <span>{visitedSections.length}/{sectionOrder.length} sections visited</span>
-                    </div>
-                    <Progress value={progressValue} />
+              <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight md:text-6xl">
+                A beginner-friendly study app for math, probability, Python, and machine learning
+              </h1>
+              <p className="mt-4 max-w-3xl text-base leading-8 text-slate-200 md:text-lg">
+                This single-page course helps a new learner build the practical foundations for an Applied AI &amp; Data Science program without assuming prior confidence in math or code.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                {overviewPoints.map((point) => (
+                  <div key={point} className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-cyan-50">
+                    {point}
                   </div>
-                  <div className="mt-6 space-y-2">
-                    {sectionOrder.map((sectionId) => (
-                      <div
-                        key={sectionId}
-                        className="flex items-center justify-between rounded-2xl bg-white/5 px-3 py-2 text-sm"
-                      >
-                        <span className="text-slate-200">{sectionTitles[sectionId]}</span>
-                        <span className={sectionCompletion[sectionId] ? 'text-emerald-300' : 'text-slate-500'}>
-                          {sectionCompletion[sectionId] ? 'Ready' : 'In progress'}
-                        </span>
+                ))}
+              </div>
+            </div>
+
+            <Card className="border-white/10 bg-white/10 text-white shadow-none backdrop-blur-md">
+              <CardHeader>
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-cyan-200">Your progress</p>
+                <CardTitle className="text-5xl font-black text-white">{progressValue}%</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm leading-7 text-slate-200">
+                  Progress now combines module completion, sub-lesson mastery, module exercises, study tasks, and final quiz results. Everything is saved in local storage.
+                </p>
+                <Progress value={progressValue} className="bg-white/15" />
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  <ProgressStat label="Modules" value={moduleProgressLabel} />
+                  <ProgressStat label="Study tasks" value={`${completedScheduleTaskIds.length}/${totalScheduleTasks} done`} />
+                  <ProgressStat label="Lesson checks" value={lessonProgressLabel} />
+                  <ProgressStat label="Exercises" value={exerciseProgressLabel} />
+                  <ProgressStat label="Final quiz" value={quizProgressLabel} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-3">
+          {quickWins.map((item) => (
+            <Card key={item.title} className="border-white/70 bg-white/82 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
+              <CardHeader>
+                <item.icon className="h-5 w-5 text-cyan-700" />
+                <CardTitle className="text-xl">{item.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm leading-7 text-slate-600">{item.body}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </section>
+
+        <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
+          <aside className="xl:sticky xl:top-6 xl:self-start">
+            <Card className="border-white/70 bg-white/88 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5 text-cyan-700" />
+                  <CardTitle>Module Navigation</CardTitle>
+                </div>
+                <p className="text-sm leading-7 text-slate-600">
+                  Follow the course in order. Each module includes a story, concept, example, Python lab, self-checks, and mini-project.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {courseModules.map((module, index) => {
+                  const isActive = activeModuleId === module.id
+                  const isComplete = completedModuleIds.includes(module.id)
+                  const Icon = moduleIconMap[module.id as keyof typeof moduleIconMap]
+                  const completedChecksForModule =
+                    module.subLessons.filter(
+                      (lesson, lessonIndex) =>
+                        selectedLessonAnswers[`${module.id}-sublesson-${lessonIndex}`] === lesson.quickCheck.correctOption,
+                    ).length +
+                    module.questions.filter(
+                      (question, questionIndex) =>
+                        selectedModuleExerciseAnswers[`${module.id}-exercise-${questionIndex}`] === question.correctOption,
+                    ).length
+                  const totalChecksForModule = module.subLessons.length + module.questions.length
+                  return (
+                    <button
+                      key={module.id}
+                      type="button"
+                      onClick={() => setActiveModuleId(module.id)}
+                      className={`flex w-full items-center justify-between rounded-[1.5rem] border px-4 py-4 text-left transition ${
+                        isActive
+                          ? 'border-cyan-600 bg-cyan-50 shadow-[0_10px_30px_rgba(8,145,178,0.15)]'
+                          : 'border-slate-200 bg-slate-50 hover:border-slate-300'
+                      }`}
+                    >
+                      <div>
+                        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                          <Icon className="h-4 w-4" />
+                          <span>Module {index + 1}</span>
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-900">{module.shortLabel}</p>
+                        <p className="mt-1 text-xs text-slate-500">{module.duration}</p>
+                        <p className="mt-2 text-xs text-slate-500">
+                          {completedChecksForModule}/{totalChecksForModule} checks correct
+                        </p>
                       </div>
-                    ))}
+                      <div className="flex items-center gap-2">
+                        <span className={`rounded-full px-3 py-1 text-xs font-bold ${isComplete ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>
+                          {isComplete ? 'Done' : 'Open'}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-slate-500" />
+                      </div>
+                    </button>
+                  )
+                })}
+              </CardContent>
+            </Card>
+          </aside>
+
+          <div className="space-y-6">
+            <section>
+              <div className="mb-4 flex items-center gap-2">
+                <BookOpenCheck className="h-5 w-5 text-cyan-700" />
+                <h2 className="text-2xl font-black tracking-tight text-slate-950">Home / Overview</h2>
+              </div>
+              <Card className="border-white/70 bg-white/88 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
+                <CardContent className="grid gap-6 p-6 md:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-700">What you will learn</p>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">
+                      You will move from basic data thinking to probability, descriptive statistics, beginner Python, and machine learning readiness. The design assumes you are capable but early in the journey.
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-700">How to use the app</p>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">
+                      Study one module at a time, reveal answers only after you attempt each prompt, and use the schedule and quiz for spaced repetition. Mark sections complete as you go.
+                    </p>
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </motion.header>
+            </section>
 
-          <div className="grid gap-6 xl:grid-cols-[340px_1fr]">
-            <CourseSidebar
-              activeSection={activeSection}
-              completedExercises={completedExerciseIds.length}
-              notes={notes}
-              onNotesChange={setNotes}
-              onSectionSelect={jumpToSection}
-              progressValue={progressValue}
-              sectionCompletion={sectionCompletion}
-              theme={theme}
-              toggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              totalExercises={exercises.length}
-            />
+            <section>
+              <StudyNotesPanel recommendation={recommendedNextLesson} onJumpToModule={setActiveModuleId} />
+            </section>
 
-            <div className="space-y-6">
-              <WelcomeSection
-                learnerProfiles={learnerProfiles}
-                selectedProfile={selectedProfile}
-                onProfileSelect={setSelectedProfile}
-                onStartLearning={() => jumpToSection('foundations')}
-                progressValue={progressValue}
+            <section>
+              <Card className="border-white/70 bg-white/88 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
+                <CardHeader>
+                  <CardTitle className="text-xl">Reset Progress</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <p className="text-sm leading-7 text-slate-600">
+                    Clear all saved learning state, including sub-lesson answers, module exercises, study tasks, and final quiz progress.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={resetAllProgress}
+                    className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+                  >
+                    Reset all progress
+                  </button>
+                </CardContent>
+              </Card>
+            </section>
+
+            <section>
+              <div className="mb-4 flex items-center gap-2">
+                <BrainCircuit className="h-5 w-5 text-cyan-700" />
+                <h2 className="text-2xl font-black tracking-tight text-slate-950">Current Module</h2>
+              </div>
+              <ModuleViewer
+                module={activeModule}
+                completed={completedModuleIds.includes(activeModule.id)}
+                onToggleComplete={toggleModuleComplete}
               />
+            </section>
 
-              <FoundationsModule
-                cards={foundationCards}
-                glossary={glossary}
-                misconceptions={misconceptionCallouts}
-                exercises={exercises.filter((exercise) => exercise.moduleId === 'foundations')}
-                completedExerciseIds={completedExerciseIds}
-                onCompleteExercise={completeExercise}
+            <section>
+              <div className="mb-4 flex items-center gap-2">
+                <Target className="h-5 w-5 text-cyan-700" />
+                <h2 className="text-2xl font-black tracking-tight text-slate-950">Bayes Practice</h2>
+              </div>
+              <BayesCalculator />
+            </section>
+
+            <section>
+              <div className="mb-4 flex items-center gap-2">
+                <CalendarClock className="h-5 w-5 text-cyan-700" />
+                <h2 className="text-2xl font-black tracking-tight text-slate-950">Study Schedule</h2>
+              </div>
+              <StudySchedule
+                schedule={studySchedule}
+                completedTaskIds={completedScheduleTaskIds}
+                onToggleTask={toggleScheduleTask}
               />
+            </section>
 
-              <ProbabilityModule
-                exercises={exercises.filter((exercise) => exercise.moduleId === 'probability')}
-                completedExerciseIds={completedExerciseIds}
-                onCompleteExercise={completeExercise}
-              />
+            <section>
+              <div className="mb-4 flex items-center gap-2">
+                <BookOpenCheck className="h-5 w-5 text-cyan-700" />
+                <h2 className="text-2xl font-black tracking-tight text-slate-950">Final Quiz</h2>
+              </div>
+              <FinalPracticeQuiz questions={finalQuiz} />
+            </section>
 
-              <StatisticsModule
-                datasets={serviceDatasets}
-                chartData={chartData}
-                exercises={exercises.filter((exercise) => exercise.moduleId === 'statistics')}
-                completedExerciseIds={completedExerciseIds}
-                onCompleteExercise={completeExercise}
-              />
-
-              <MatricesModule
-                records={matrixRecords}
-                countyDemandData={countyDemandData}
-                exercises={exercises.filter((exercise) => exercise.moduleId === 'matrices')}
-                completedExerciseIds={completedExerciseIds}
-                onCompleteExercise={completeExercise}
-              />
-
-              <AppliedConnections
-                exercises={exercises.filter((exercise) => exercise.moduleId === 'ai-connections')}
-                completedExerciseIds={completedExerciseIds}
-                onCompleteExercise={completeExercise}
-              />
-
-              <UseCasesSection useCases={useCases} />
-
-              <PracticeZone
-                exercises={exercises.filter((exercise) => exercise.moduleId === 'practice')}
-                completedExerciseIds={completedExerciseIds}
-                onCompleteExercise={completeExercise}
-              />
-
-              <QASection items={faqs} />
-              <NextStepsSection roadmap={roadmap} />
-            </div>
+            <section>
+              <div className="mb-4 flex items-center gap-2">
+                <Target className="h-5 w-5 text-cyan-700" />
+                <h2 className="text-2xl font-black tracking-tight text-slate-950">Capstone Project</h2>
+              </div>
+              <CapstoneProject project={capstoneProject} />
+            </section>
           </div>
         </div>
-      </main>
+      </div>
+    </main>
+  )
+}
+
+function ProgressStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[1.25rem] border border-white/10 bg-white/5 px-4 py-4">
+      <p className="text-xs uppercase tracking-[0.2em] text-cyan-200">{label}</p>
+      <p className="mt-2 text-sm font-semibold text-white">{value}</p>
     </div>
   )
 }
