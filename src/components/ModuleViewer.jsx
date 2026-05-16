@@ -39,17 +39,40 @@ export function ModuleViewer({ isCompleted, module, onToggleComplete }) {
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl bg-slate-50 p-4">
           <h3 className="font-bold text-slate-950">The Story</h3>
-          <p className="mt-2 leading-7 text-slate-700">{module.story}</p>
+          <div className="mt-2 space-y-3 leading-7 text-slate-700">
+            {module.story.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
         </div>
         <div className="rounded-2xl bg-slate-50 p-4">
           <h3 className="font-bold text-slate-950">The Idea</h3>
-          <p className="mt-2 leading-7 text-slate-700">{module.idea}</p>
+          <div className="mt-2 space-y-3 leading-7 text-slate-700">
+            {module.idea.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
         </div>
         <div className="rounded-2xl bg-slate-50 p-4 md:col-span-2">
           <h3 className="font-bold text-slate-950">Concrete Example</h3>
-          <p className="mt-2 leading-7 text-slate-700">{module.example}</p>
+          <div className="mt-2 space-y-3 leading-7 text-slate-700">
+            {module.example.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
         </div>
       </div>
+
+      {module.deepDive && (
+        <div className="mt-5 rounded-2xl bg-blue-50 p-4 ring-1 ring-blue-200">
+          <h3 className="font-bold text-blue-950">Diving Deeper</h3>
+          <div className="mt-2 space-y-3 leading-7 text-blue-900">
+            {module.deepDive.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+        </div>
+      )}
 
       <CodeBlock code={module.lab} />
 

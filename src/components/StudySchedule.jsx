@@ -17,8 +17,17 @@ export function StudySchedule({ schedule }) {
             key={day.day}
             className="rounded-3xl bg-gradient-to-b from-slate-50 to-white p-4 ring-1 ring-slate-200"
           >
-            <h3 className="text-lg font-black">{day.day}</h3>
-            <p className="mt-1 text-sm font-medium text-slate-500">{day.focus}</p>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-black">{day.day}</h3>
+                <p className="mt-1 text-sm font-medium text-slate-500">{day.focus}</p>
+              </div>
+              {day.note && (
+                <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white">
+                  {day.note}
+                </span>
+              )}
+            </div>
             <div className="mt-4 space-y-3">
               {day.blocks.map((block) => (
                 <div

@@ -10,6 +10,28 @@ import { BayesCalculator } from './components/BayesCalculator'
 import { StudySchedule } from './components/StudySchedule'
 import { FinalQuiz } from './components/FinalQuiz'
 
+const nextSteps = [
+  {
+    title: 'Python tools',
+    detail: 'Focus next on NumPy, Pandas, and Matplotlib. You will use them constantly.',
+  },
+  {
+    title: 'Math intuition',
+    detail:
+      'Use 3Blue1Brown’s “Essence of Linear Algebra” and Khan Academy statistics and probability for extra repetition.',
+  },
+  {
+    title: 'Machine learning practice',
+    detail:
+      'Use the scikit-learn tutorial and train a small classifier on the digits dataset you saw in the PCA module.',
+  },
+  {
+    title: 'Reading',
+    detail:
+      'A strong gentle bridge text is “Mathematics for Machine Learning” by Deisenroth and co-authors.',
+  },
+]
+
 const defaultProgress = modules.reduce((accumulator, module) => {
   accumulator[module.id] = false
   return accumulator
@@ -70,6 +92,43 @@ export default function App() {
           </div>
         </header>
 
+        <section className="card grid gap-5 p-5 md:grid-cols-[1.1fr_0.9fr] md:p-6">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              How to use this course
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">
+              One repeated rhythm for every module
+            </h2>
+            <p className="mt-3 leading-7 text-slate-700">
+              Each module follows the same pattern: The Story, The Idea, a Concrete Example,
+              Python Lab, Check Yourself questions, and a Mini-Project. The point is to move from
+              plain English to numbers to code without losing the meaning of the problem.
+            </p>
+            <p className="mt-3 leading-7 text-slate-700">
+              Estimated total time is about 6 to 8 hours, split into bite-size sessions. You do
+              not need to rush. Use the notes box to rewrite ideas in your own words.
+            </p>
+          </div>
+          <div className="rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-200">
+            <h3 className="text-lg font-black text-slate-950">Course rhythm</h3>
+            <div className="mt-4 grid gap-3">
+              {[
+                'The Story: why we care, in plain English',
+                'The Idea: the math, gently',
+                'Concrete Example: real numbers worked out',
+                'Python Lab: copy-paste code you can run',
+                'Check Yourself: active recall with revealable answers',
+                'Mini-Project: a tiny challenge you do yourself',
+              ].map((item) => (
+                <div key={item} className="rounded-2xl bg-white p-3 text-sm leading-6 text-slate-700">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="grid gap-6 lg:grid-cols-[320px_1fr]">
           <Sidebar
             activeModule={activeModule}
@@ -92,6 +151,25 @@ export default function App() {
 
         <StudySchedule schedule={schedule} />
         <FinalQuiz quizItems={finalQuiz} />
+
+        <section className="card p-5 md:p-6">
+          <div className="mb-5">
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Where to go next
+            </p>
+            <h2 className="text-2xl font-black text-slate-950">
+              Keep the momentum after this prep course
+            </h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {nextSteps.map((step) => (
+              <div key={step.title} className="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-200">
+                <h3 className="font-bold text-slate-950">{step.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-700">{step.detail}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </main>
   )
