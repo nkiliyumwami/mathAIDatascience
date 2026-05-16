@@ -22,6 +22,29 @@ For GitHub Codespaces or any remote environment:
 npm run dev -- --host 0.0.0.0
 ```
 
+## Codespaces note
+
+This project expects a modern Node runtime. If Codespaces starts Vite with an older Node version, you may see an error like:
+
+```bash
+TypeError: crypto.getRandomValues is not a function
+```
+
+Check your Node version first:
+
+```bash
+node -v
+```
+
+If it is older than Node 20, switch to a newer version before running the app:
+
+```bash
+nvm install 22
+nvm use 22
+npm install
+npm run dev -- --host 0.0.0.0
+```
+
 ## Production build
 
 ```bash
